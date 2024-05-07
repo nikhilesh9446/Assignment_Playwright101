@@ -1,0 +1,40 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  // 1. Open the https://www.lambdatest.com/selenium-playground page and click “Drag & Drop Sliders” under “Progress Bars & Sliders”.
+  await page.goto('https://www.lambdatest.com/selenium-playground');
+  await page.click('a[href="#Drag"]');
+
+  // Wait for the slider to be visible and interactable
+  await page.waitForSelector('.ui-slider-handle');
+
+  // 2. Select the slider “Default value 15” and drag the bar to make it 95 by validating whether the range value shows 95.
+  const sliderHandle = await page.$('.ui-slider-handle');
+  const sliderPosition = await sliderHandle.boundingBox();
+
+  // Calculate the new position for 95 value
+  const newSliderPositionX = sliderPosition.x + (80 / 100 * sliderPosition.width);
+
+  // Drag the slider handle to the new position
+  await page.mouse.move(sliderPosition.x, sliderPosition.y);
+  await page.mouse.down();
+  await page.mouse.move(newSliderPositionX, sliderPosition.y);
+  await page.mouse.up();
+
+  // Wait for the slider to update its value
+  await page.waitForTimeout(500);
+
+  // Get the range value and validate whether it shows 95
+  const rangeValue = await page.textContent('.range');
+  if (rangeValue.trim() !== '95') {
+    throw new Error('Range value validation failed!');
+  }
+
+  console.log('Test passed successfully!');
+
+  await browser.close();
+})();

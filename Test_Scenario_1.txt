@@ -1,0 +1,37 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  // 1. Open LambdaTest’s Selenium Playground
+  await page.goto('https://www.lambdatest.com/selenium-playground');
+
+  // 2. Click “Simple Form Demo” under Input Forms.
+  await page.click('a[href="#SimpleForm"]');
+
+  // 3. Validate that the URL contains “simple-form-demo”.
+  const url = page.url();
+  if (!url.includes('simple-form-demo')) {
+    throw new Error('URL validation failed!');
+  }
+
+  // 4. Create a variable for a string value E.g: “Welcome to LambdaTest”.
+  const message = 'Welcome to LambdaTest';
+
+  // 5. Use this variable to enter values in the “Enter Message” text box.
+  await page.fill('#user-message', message);
+
+  // 6. Click “Get Checked Value”.
+  await page.click('button[onclick="showInput();"]');
+
+  // 7. Validate whether the same text message is displayed in the right-hand panel under the “Your Message:” section.
+  const displayedMessage = await page.textContent('#display');
+  if (displayedMessage.trim() !== `Your Message: ${message}`) {
+    throw new Error('Displayed message validation failed!');
+  }
+
+  console.log('Test passed successfully!');
+
+  await browser.close();
+})();
